@@ -19,10 +19,12 @@ COPY --from=composer:2.9.8@sha256:b09bccd91a78fe8a9ab4b33d707b862e8fe54fec17782e
 # PHP extensions the app needs (gd, intl, pdo_mysql, zip, apcu; APCu from its GitHub release, checked
 # against its sha256); build dependencies are removed again.
 RUN set -eux; \
-    savedAptMark="$(apt-mark showmanual)"; \
     apt-get update; \
-    apt-get install -y --no-install-recommends $PHPIZE_DEPS libicu-dev libzip-dev libpng-dev \
-        libjpeg62-turbo-dev libwebp-dev libfreetype-dev; \
+    apt-get install -y --no-install-recommends nginx unzip git \
+        libicu76 libzip5 libpng16-16t64 libjpeg62-turbo libwebp7 libfreetype6; \
+    apt-mark manual nginx unzip git libicu76 libzip5 libpng16-16t64 libjpeg62-turbo libwebp7 libfreetype6; \
+    buildDeps="$PHPIZE_DEPS libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype-dev"; \
+    apt-get install -y --no-install-recommends $buildDeps; \
     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp; \
     docker-php-source extract; \
     curl -fsSL "https://codeload.github.com/krakjoe/apcu/tar.gz/refs/tags/v${APCU_VERSION}" -o /tmp/apcu.tgz; \
@@ -30,15 +32,9 @@ RUN set -eux; \
     mkdir -p /usr/src/php/ext/apcu; tar -xzf /tmp/apcu.tgz -C /usr/src/php/ext/apcu --strip-components=1; rm /tmp/apcu.tgz; \
     docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip apcu; \
     docker-php-source delete; \
-    apt-mark auto '.*' > /dev/null; \
-    [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
-    find /usr/local -type f -executable -exec ldd '{}' ';' 2>/dev/null \
-        | awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) { next }; gsub("^/(usr/)?", "", so); printf "*%s\n", so }' \
-        | sort -u | xargs -r dpkg-query --search | cut -d: -f1 | sort -u | xargs -r apt-mark manual; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
-    apt-get install -y --no-install-recommends nginx unzip git; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps; \
     rm -rf /var/lib/apt/lists/*; \
-    php -m | grep -qi apcu; php -m | grep -qi gd; php -m | grep -qi intl; php -m | grep -qi pdo_mysql; php -m | grep -qi zip
+    for m in apcu gd intl pdo_mysql zip; do php -m | grep -qix "$m"; done
 
 # Upstream code, checked against its sha256.
 RUN set -eux; \
