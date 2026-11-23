@@ -99,8 +99,9 @@ for i in $(seq 1 30); do
   curl -fsS -o /dev/null "http://127.0.0.1:${PORT}/healthz" && break
   sleep 1
 done
-status="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/can-register" || true)"
-if [ "$status" = "200" ]; then
+# /can-register always answers HTTP 200; the JSON body says whether an account already exists.
+canreg="$(curl -s "http://127.0.0.1:${PORT}/api/can-register" || true)"
+if [[ "$canreg" == *'"success":true'* ]]; then
   log "Creating the owner account ${PMS_ADMIN_EMAIL}"
   body="$(php -r 'echo json_encode([
     "email" => getenv("PMS_ADMIN_EMAIL"), "username" => getenv("PMS_ADMIN_USERNAME") ?: "owner",
