@@ -1,5 +1,7 @@
 # Personal Management System on Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/personal-managemen-1?utm_medium=integration&utm_source=button&utm_campaign=personal-management-system)
+
 This repo is the source of a Railway template for [Personal Management System](https://github.com/Volmarg/personal-management-system) (PMS) by Volmarg. PMS is a self-hosted web app for personal data: notes, todos, goals, contacts, passwords, payments, calendar, travel ideas, files and images.
 
 ## What it deploys
