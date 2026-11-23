@@ -84,5 +84,4 @@ COPY start.sh /usr/local/bin/pms-start
 
 ENV PMS_VERSION=${PMS_VERSION}
 EXPOSE 8080
-VOLUME ["/data"]
 CMD ["bash", "/usr/local/bin/pms-start"]
