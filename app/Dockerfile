@@ -12,20 +12,24 @@ ARG PMS_BACKEND_SHA256=92f707ae89ca4b937bd1d889650f8cba93f0950d98ef6b5dedcbb0b31
 ARG PMS_FRONTEND_COMMIT=f16eb6dbdb81b0d5d47b99929e5336980629366d
 ARG PMS_FRONTEND_SHA256=d27ab0d8fff54b48cc4f73c9c71eba7030b1d8c8cd19437814e49a2894aa2b6e
 ARG APCU_VERSION=5.1.28
+ARG APCU_SHA256=0e60ba9d0fa4021c57a70c071f3d8f71de236275d084e560d5959fec4edd8c32
 
 COPY --from=composer:2.9.8@sha256:b09bccd91a78fe8a9ab4b33d707b862e8fe54fec17782e32683ad2a69c46867d /usr/bin/composer /usr/local/bin/composer
 
-# PHP extensions the app needs (gd, intl, pdo_mysql, zip, apcu); build dependencies are removed again.
+# PHP extensions the app needs (gd, intl, pdo_mysql, zip, apcu; APCu from its GitHub release, checked
+# against its sha256); build dependencies are removed again.
 RUN set -eux; \
     savedAptMark="$(apt-mark showmanual)"; \
     apt-get update; \
     apt-get install -y --no-install-recommends $PHPIZE_DEPS libicu-dev libzip-dev libpng-dev \
         libjpeg62-turbo-dev libwebp-dev libfreetype-dev; \
     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp; \
-    docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip; \
-    pecl install "apcu-${APCU_VERSION}"; \
-    docker-php-ext-enable apcu; \
-    rm -rf /tmp/pear; \
+    docker-php-source extract; \
+    curl -fsSL "https://codeload.github.com/krakjoe/apcu/tar.gz/refs/tags/v${APCU_VERSION}" -o /tmp/apcu.tgz; \
+    echo "${APCU_SHA256}  /tmp/apcu.tgz" | sha256sum -c -; \
+    mkdir -p /usr/src/php/ext/apcu; tar -xzf /tmp/apcu.tgz -C /usr/src/php/ext/apcu --strip-components=1; rm /tmp/apcu.tgz; \
+    docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip apcu; \
+    docker-php-source delete; \
     apt-mark auto '.*' > /dev/null; \
     [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
     find /usr/local -type f -executable -exec ldd '{}' ';' 2>/dev/null \
