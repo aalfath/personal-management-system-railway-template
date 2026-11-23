@@ -20,9 +20,9 @@ COPY --from=composer:2.9.8@sha256:b09bccd91a78fe8a9ab4b33d707b862e8fe54fec17782e
 # against its sha256); build dependencies are removed again.
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends nginx unzip git \
+    apt-get install -y --no-install-recommends nginx unzip git tree \
         libicu76 libzip5 libpng16-16t64 libjpeg62-turbo libwebp7 libfreetype6; \
-    apt-mark manual nginx unzip git libicu76 libzip5 libpng16-16t64 libjpeg62-turbo libwebp7 libfreetype6; \
+    apt-mark manual nginx unzip git tree libicu76 libzip5 libpng16-16t64 libjpeg62-turbo libwebp7 libfreetype6; \
     buildDeps="$PHPIZE_DEPS libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype-dev"; \
     apt-get install -y --no-install-recommends $buildDeps; \
     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp; \
