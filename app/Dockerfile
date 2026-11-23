@@ -72,6 +72,8 @@ RUN set -eux; \
     mkdir -p /srv/seed/upload/images; \
     cp -a /app/public/upload/images/system /srv/seed/upload/images/; \
     rm -rf /app/public/upload; ln -s /data/upload /app/public/upload; \
+    # The app mixes paths relative to the project root (public/upload/...) and to the web root (upload/...).
+    ln -s /data/upload /app/upload; \
     rm -f /app/.env; mkdir -p /app/var; chown -R www-data:www-data /app/var
 
 COPY php.ini /usr/local/etc/php/conf.d/zz-pms.ini
