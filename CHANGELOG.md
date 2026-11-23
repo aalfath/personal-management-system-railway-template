@@ -2,6 +2,10 @@
 
 Breaking changes come first in each entry. Read the entry before you apply an update on Railway.
 
+## 2.1.0-railway.2 (2026-11-23)
+
+- README: Deploy on Railway button for the published template (`personal-managemen-1`). No change to the app or its settings.
+
 ## 2.1.0-railway.1 (2026-11-23)
 
 First release of the template.
